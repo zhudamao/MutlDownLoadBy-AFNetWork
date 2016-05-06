@@ -54,9 +54,12 @@
         
         manager.responseSerializer = [AFHTTPResponseSerializer serializer];
         
+        typeof(self) __weak weakSelf = self;
+        
        self.mp3.task =   [manager downloadTaskWithRequest:request progress:^(NSProgress * _Nonnull downloadProgress) {
             dispatch_async(dispatch_get_main_queue(), ^{
-                self.progressView.progress = downloadProgress.fractionCompleted;
+                __strong typeof(weakSelf) temp = weakSelf;
+                temp.progressView.progress = downloadProgress.fractionCompleted;
             });
         } destination:^NSURL * _Nonnull(NSURL * _Nonnull targetPath, NSURLResponse * _Nonnull response) {
             
@@ -73,6 +76,10 @@
             
         } completionHandler:^(NSURLResponse * _Nonnull response, NSURL * _Nullable filePath, NSError * _Nullable error) {
             sender.selected = NO;
+            
+            if (!error) {
+                weakSelf.mp3.task = nil;
+            }
         }];
         
 
